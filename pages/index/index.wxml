@@ -1,0 +1,141 @@
+<view class="container{{theme === 'dark' ? ' dark' : ''}}">
+
+  <!-- 浮动花色装饰 -->
+  <view class="suit-deco suit-1">
+    <text class="suit-text">♠</text>
+  </view>
+  <view class="suit-deco suit-2">
+    <text class="suit-text">♦</text>
+  </view>
+  <view class="suit-deco suit-3">
+    <text class="suit-text">♣</text>
+  </view>
+  <view class="suit-deco suit-4">
+    <text class="suit-text">♠</text>
+  </view>
+  <view class="suit-deco suit-5">
+    <text class="suit-text">♥</text>
+  </view>
+
+  <!-- 用户信息卡片 -->
+  <view class="notice-bar card-anim anim-d1">
+    <view class="notice-track">
+      <text class="notice-text">本小程序仅用于便捷记账，不得用于赌博、金钱交易或任何违法违规用途。</text>
+      <text class="notice-text">本小程序仅用于便捷记账，不得用于赌博、金钱交易或任何违法违规用途。</text>
+    </view>
+  </view>
+
+  <view class="profile-card card-anim anim-d1">
+    <!-- 角饰 -->
+    <view class="corner-ornament corner-tl">
+      <text class="corner-icon">✦</text>
+    </view>
+    <view class="corner-ornament corner-tr">
+      <text class="corner-icon">✦</text>
+    </view>
+    <view class="corner-ornament corner-bl">
+      <text class="corner-icon">✦</text>
+    </view>
+    <view class="corner-ornament corner-br">
+      <text class="corner-icon">✦</text>
+    </view>
+
+    <view class="profile-header">
+      <view class="avatar-wrap">
+        <image wx:if="{{profile.avatarUrl}}" class="avatar" src="{{profile.avatarUrl}}" mode="aspectFill" />
+        <view wx:else class="avatar avatar-default">
+          <text class="avatar-icon-text">◉</text>
+        </view>
+      </view>
+      <view class="profile-info">
+        <text class="nickname" wx:if="{{profile.nickname}}">{{profile.nickname}}</text>
+        <text class="nickname nickname-placeholder" wx:else>未设置昵称</text>
+      </view>
+      <view class="theme-toggle" bindtap="onToggleTheme">
+        <text class="toggle-text">{{theme === 'light' ? '深色' : '浅色'}}</text>
+      </view>
+      <view class="edit-btn" bindtap="onEditProfile">
+        <text class="edit-text">编辑</text>
+      </view>
+    </view>
+
+    <view class="stats-row">
+      <view class="stat-block">
+        <text class="stat-value">{{userStats.totalGames}}</text>
+        <text class="stat-name">总场</text>
+      </view>
+      <view class="stat-divider"></view>
+      <view class="stat-block">
+        <text class="stat-value">{{userStats.winCount}}</text>
+        <text class="stat-name">胜场</text>
+      </view>
+      <view class="stat-divider"></view>
+      <view class="stat-block">
+        <text class="stat-value">{{userStats.winRate}}%</text>
+        <text class="stat-name">胜率</text>
+      </view>
+    </view>
+
+    <view class="history-entry" bindtap="goHistory">
+      <text class="history-icon">⏲</text>
+      <text class="history-text">历史记录</text>
+      <text class="history-arrow">›</text>
+    </view>
+  </view>
+
+  <!-- 操作按钮 -->
+  <view class="action-buttons">
+    <view class="action-btn action-create card-anim anim-d2" bindtap="onCreateRoom" style="height: 100rpx; display: flex; box-sizing: border-box">
+      <text class="action-icon">＋</text>
+      <text class="action-text" style="width: 135rpx; height: 39rpx; display: block; box-sizing: border-box">创建房间</text>
+    </view>
+    <view class="action-btn action-scan card-anim anim-d3" bindtap="onScanEnter" style="height: 100rpx; display: flex; box-sizing: border-box">
+      <text class="action-icon">⌖</text>
+      <text class="action-text">扫码进入</text>
+    </view>
+  </view>
+
+  <!-- 未结算房间 -->
+  <view class="active-rooms" wx:if="{{activeRooms.length > 0}}">
+    <text class="active-rooms-title">未结算房间</text>
+    <view class="active-room-item" wx:for="{{activeRooms}}" wx:key="id" bindtap="onEnterRoom" data-id="{{item.id}}">
+      <view class="active-room-info">
+        <text class="active-room-name">{{item.name}}</text>
+        <view class="active-room-players">
+          <text class="player-tag" wx:for="{{item.players}}" wx:key="id" wx:for-item="player" wx:for-index="pIdx">{{player.name}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 编辑资料弹窗 -->
+  <view class="modal-mask" wx:if="{{showEditModal}}" bindtap="onCloseModal">
+    <view class="modal-content" catchtap>
+      <view class="modal-header">
+        <text class="modal-title">编辑个人信息</text>
+        <text class="modal-close" bindtap="onCloseModal">
+          <text class="modal-close-icon">×</text>
+        </text>
+      </view>
+      <view class="modal-body">
+        <view class="form-item">
+          <text class="form-label">头像</text>
+          <button class="avatar-upload" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
+            <image wx:if="{{editAvatarUrl}}" class="upload-preview" src="{{editAvatarUrl}}" mode="aspectFill" />
+            <view wx:else class="upload-placeholder">
+              <text class="upload-icon-text">◉</text>
+            </view>
+          </button>
+        </view>
+        <view class="form-item">
+          <text class="form-label">昵称</text>
+          <input class="input" type="nickname" placeholder="请输入昵称" placeholder-class="input-placeholder" value="{{editNickname}}" bindinput="onNicknameInput" maxlength="12" />
+        </view>
+      </view>
+      <view class="modal-footer">
+        <view class="modal-btn modal-btn-cancel" bindtap="onCloseModal">取消</view>
+        <view class="modal-btn modal-btn-confirm" bindtap="onSaveProfile">保存</view>
+      </view>
+    </view>
+  </view>
+</view>

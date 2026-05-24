@@ -1,0 +1,240 @@
+page {
+  background: #f5f0e8;
+}
+
+.container {
+  --bg-deep: #f5f0e8;
+  --bg-card: #ffffff;
+  --gold: #a68a5b;
+  --gold-bright: #8b6914;
+  --gold-dim: #c4a97a;
+  --cream: #2c2318;
+  --text-dim: #9e9486;
+  --border: rgba(166,138,91,0.2);
+
+  padding: 24rpx;
+  padding-bottom: calc(140rpx + env(safe-area-inset-bottom));
+  min-height: 100vh;
+  background: var(--bg-deep);
+  font-family: 'PingFang SC', 'Microsoft YaHei', 'SimHei', sans-serif;
+}
+
+.container.dark {
+  --bg-deep: #0a0a0a;
+  --bg-card: #141414;
+  --gold: #c8a97e;
+  --gold-bright: #d4af37;
+  --gold-dim: #a08c6a;
+  --cream: #f0e8dc;
+  --text-dim: #7a7a7a;
+  --border: rgba(200,169,126,0.15);
+
+  background: var(--bg-deep);
+}
+
+/* 牌局信息 */
+.game-info {
+  background: var(--bg-card);
+  border-radius: 12rpx;
+  padding: 24rpx;
+  margin-bottom: 24rpx;
+  border: 1rpx solid var(--border);
+}
+
+.info-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16rpx;
+}
+
+.game-type {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: var(--cream);
+}
+
+.status-tag {
+  font-size: 22rpx;
+  padding: 6rpx 16rpx;
+  border-radius: 6rpx;
+}
+
+.status-tag.playing {
+  background: rgba(166,138,91,0.15);
+  color: var(--gold);
+}
+
+.status-tag.finished {
+  background: rgba(158,148,134,0.15);
+  color: var(--text-dim);
+}
+
+.info-meta {
+  display: flex;
+  gap: 24rpx;
+}
+
+.meta-item {
+  font-size: 24rpx;
+  color: var(--text-dim);
+}
+
+/* 排名 */
+.ranking-section {
+  background: var(--bg-card);
+  border-radius: 12rpx;
+  padding: 24rpx;
+  margin-bottom: 24rpx;
+  border: 1rpx solid var(--border);
+}
+
+.section-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: var(--cream);
+  margin-bottom: 20rpx;
+  display: block;
+}
+
+.ranking-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+}
+
+.ranking-item {
+  display: flex;
+  align-items: center;
+  padding: 16rpx 20rpx;
+  background: var(--bg-deep);
+  border-radius: 8rpx;
+}
+
+.rank-badge {
+  width: 48rpx;
+  height: 48rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  margin-right: 16rpx;
+  font-size: 24rpx;
+  font-weight: 700;
+  background: var(--bg-card);
+  color: var(--text-dim);
+}
+
+.rank-first {
+  background: linear-gradient(135deg, var(--gold) 0%, #8b6914 100%);
+  color: #fff;
+}
+
+.container.dark .rank-first {
+  color: #0a0a0a;
+}
+
+.rank-second {
+  background: var(--gold-dim);
+  color: #fff;
+}
+
+.container.dark .rank-second {
+  color: #0a0a0a;
+}
+
+.rank-third {
+  background: rgba(166,138,91,0.3);
+  color: var(--gold);
+}
+
+.rank-name {
+  flex: 1;
+  font-size: 28rpx;
+  color: var(--cream);
+  font-weight: 500;
+}
+
+.rank-score {
+  font-size: 30rpx;
+  font-weight: 700;
+}
+
+.score-positive {
+  color: #e74c3c;
+}
+
+.score-negative {
+  color: #27ae60;
+}
+
+/* 积分记录 */
+.rounds-section {
+  background: var(--bg-card);
+  border-radius: 12rpx;
+  padding: 24rpx;
+  margin-bottom: 24rpx;
+  border: 1rpx solid var(--border);
+}
+
+.rounds-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+}
+
+.round-item {
+  display: flex;
+  align-items: center;
+  padding: 16rpx 20rpx;
+  background: var(--bg-deep);
+  border-radius: 8rpx;
+}
+
+.round-note {
+  flex: 1;
+  font-size: 26rpx;
+  color: var(--cream);
+}
+
+.round-amount {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: var(--gold-bright);
+}
+
+/* 底部操作栏 */
+.bottom-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--bg-card);
+  border-top: 1rpx solid var(--border);
+  padding: 20rpx 24rpx;
+  padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
+}
+
+.bottom-btn {
+  height: 88rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12rpx;
+}
+
+.btn-delete {
+  background: var(--bg-deep);
+  border: 1rpx solid var(--border);
+}
+
+.bottom-text {
+  font-size: 28rpx;
+  color: #000000;
+  letter-spacing: 2rpx;
+  font-family: 'SimHei', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+}
+
+.container.dark .bottom-text {
+  color: #ffffff;
+}

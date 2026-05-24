@@ -1,0 +1,50 @@
+<view class="container{{theme === 'dark' ? ' dark' : ''}}">
+  <!-- 牌局信息 -->
+  <view class="game-info">
+    <view class="info-header">
+      <text class="game-type">{{game.typeName}}</text>
+      <view class="status-tag {{game.status === 'finished' ? 'finished' : 'playing'}}">
+        {{game.status === 'finished' ? '已结束' : '进行中'}}
+      </view>
+    </view>
+    <view class="info-meta">
+      <text class="meta-item">{{game.players.length}} 人</text>
+      <text class="meta-item">{{game.rounds.length}} 局</text>
+      <text class="meta-item">{{timeText}}</text>
+    </view>
+  </view>
+
+  <!-- 最终排名 -->
+  <view class="ranking-section">
+    <text class="section-title">最终排名</text>
+    <view class="ranking-list">
+      <view class="ranking-item" wx:for="{{rankings}}" wx:key="id">
+        <view class="rank-badge {{index === 0 ? 'rank-first' : index === 1 ? 'rank-second' : index === 2 ? 'rank-third' : ''}}">
+          <text>{{index + 1}}</text>
+        </view>
+        <text class="rank-name">{{item.name}}</text>
+        <text class="rank-score {{item.total > 0 ? 'score-positive' : item.total < 0 ? 'score-negative' : ''}}">
+          {{item.total > 0 ? '+' : ''}}{{item.total}}
+        </text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 各轮明细 -->
+  <view class="rounds-section" wx:if="{{game.rounds.length > 0}}">
+    <text class="section-title">积分记录</text>
+    <view class="rounds-list">
+      <view class="round-item" wx:for="{{game.rounds}}" wx:key="id" wx:for-item="round">
+        <text class="round-note">{{round.note || ('第' + (index + 1) + '轮')}}</text>
+        <text class="round-amount">{{round.amount || 0}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 操作 -->
+  <view class="bottom-bar">
+    <view class="bottom-btn btn-delete" bindtap="onDelete">
+      <text class="bottom-text">删除牌局</text>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,13 @@
+﻿# WeChat Mini Program local/private config
+project.private.config.json
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Dependencies / build artifacts
+node_modules/
+dist/
+miniprogram_npm/

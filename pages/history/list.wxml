@@ -1,0 +1,49 @@
+<view class="container{{theme === 'dark' ? ' dark' : ''}}">
+  <!-- 搜索栏 -->
+  <view class="search-bar">
+    <view class="search-input-wrap">
+      <input
+        class="search-input"
+        placeholder="搜索牌局、玩家..."
+        placeholder-class="search-placeholder"
+        value="{{keyword}}"
+        bindinput="onSearchInput"
+        bindconfirm="onSearch"
+      />
+      <text class="search-clear" wx:if="{{keyword}}" bindtap="onClearSearch">清除</text>
+      <text class="search-icon" bindtap="onSearch">搜索</text>
+    </view>
+  </view>
+
+  <!-- 筛选栏 -->
+  <view class="filter-bar">
+    <view class="filter-tags">
+      <view
+        class="filter-tag {{currentFilter === item.value ? 'active' : ''}}"
+        wx:for="{{filters}}"
+        wx:key="value"
+        bindtap="onFilter"
+        data-value="{{item.value}}"
+      >{{item.label}}</view>
+    </view>
+    <picker mode="date" value="{{selectedDate}}" bindchange="onDateChange">
+      <view class="date-picker">
+        <text class="date-text">{{selectedDate || '日期'}}</text>
+        <text class="date-clear" wx:if="{{selectedDate}}" catchtap="onClearDate">×</text>
+      </view>
+    </picker>
+  </view>
+
+  <!-- 牌局列表 -->
+  <view class="game-list" wx:if="{{filteredCount > 0}}">
+    <game-card wx:for="{{visibleGames}}" wx:key="id" game="{{item}}" theme="{{theme}}" />
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty-state" wx:if="{{filteredCount === 0}}">
+    <text class="empty-text">{{keyword ? '没有找到匹配的牌局' : '还没有牌局记录'}}</text>
+    <view class="empty-action" wx:if="{{!keyword}}" bindtap="onCreateRoom">
+      <text>新建牌局</text>
+    </view>
+  </view>
+</view>

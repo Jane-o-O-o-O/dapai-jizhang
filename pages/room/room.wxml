@@ -1,0 +1,172 @@
+<view class="container{{theme === 'dark' ? ' dark' : ''}}">
+  <!-- 房间名 -->
+  <view class="room-header">
+    <text class="room-label">房间号：</text>
+    <text class="room-name">{{room.name}}</text>
+  </view>
+
+  <!-- 玩家横栏 -->
+  <scroll-view class="player-bar" scroll-x enable-flex>
+    <view class="player-list">
+      <view class="player-card" wx:for="{{room.players}}" wx:key="id" bindtap="onTapPlayer" data-id="{{item.id}}" data-index="{{index}}">
+        <view class="player-avatar-wrap">
+          <image wx:if="{{item.avatarUrl}}" class="player-avatar" src="{{item.avatarUrl}}" mode="aspectFill" binderror="onPlayerAvatarError" data-index="{{index}}" />
+          <view wx:else class="player-avatar player-avatar-default">
+            <text class="player-avatar-char">{{item.initial}}</text>
+          </view>
+          <view class="player-me" wx:if="{{index === 0}}">
+            <text class="player-me-text">我</text>
+          </view>
+        </view>
+        <text class="player-name">{{item.name}}</text>
+        <text class="player-score {{item.score >= 0 ? 'score-positive' : 'score-negative'}}">{{item.score}}</text>
+      </view>
+      <view class="player-card player-add" bindtap="onAddPlayer">
+        <view class="player-avatar-wrap">
+          <view class="player-avatar player-avatar-add">
+            <text class="player-add-char">+</text>
+          </view>
+        </view>
+        <text class="player-name player-name-dim">添加</text>
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- 记录列表 -->
+  <view class="score-section">
+    <view class="score-header">
+      <text class="score-title">积分记录</text>
+      <text class="score-count">共 {{room.rounds.length}} 笔</text>
+    </view>
+
+    <view class="rounds-list" wx:if="{{room.rounds.length > 0}}">
+      <view class="round-item" wx:for="{{room.rounds}}" wx:key="id" wx:for-item="round" wx:for-index="rIdx">
+        <text class="round-note">{{round.note}}</text>
+        <text class="round-amount">{{round.amount}}</text>
+        <view class="round-delete" catchtap="onDeleteRound" data-id="{{round.id}}">
+          <text class="round-delete-icon">×</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="empty-rounds" wx:if="{{room.rounds.length === 0}}">
+      <text class="empty-text">点击头像转出积分</text>
+    </view>
+  </view>
+
+  <!-- 底部操作栏 -->
+  <view class="bottom-bar">
+    <view class="bottom-btn btn-qr" bindtap="onShowQR">
+      <text class="bottom-icon">▦</text>
+      <text class="bottom-text">二维码</text>
+    </view>
+    <view class="bottom-btn btn-end" bindtap="onSettlement">
+      <text class="bottom-icon">□</text>
+      <text class="bottom-text">结算</text>
+    </view>
+  </view>
+</view>
+
+<!-- 转账输入弹窗 -->
+<view class="modal-mask transfer-mask" wx:if="{{showNumpad}}" bindtap="onCloseNumpad">
+    <view class="transfer-modal" catchtap>
+      <text class="transfer-title">记账</text>
+    <view class="native-score-avatar-wrap">
+      <image wx:if="{{scoringPlayer.avatarUrl}}" class="player-avatar native-score-avatar" src="{{scoringPlayer.avatarUrl}}" mode="aspectFill" binderror="onScoringAvatarError" />
+      <view wx:else class="player-avatar player-avatar-default native-score-avatar">
+        <text class="player-avatar-char">{{scoringPlayer.initial}}</text>
+      </view>
+    </view>
+    <text class="transfer-target">{{scoringPlayer.name}}</text>
+    <view class="native-score-field">
+      <input
+        class="native-score-input"
+        type="digit"
+        value="{{scoreInput}}"
+        focus="{{showNumpad}}"
+        cursor-spacing="28"
+        confirm-type="done"
+        placeholder="请输入金额"
+        placeholder-class="native-score-placeholder"
+        bindinput="onScoreInput"
+        bindconfirm="onConfirmScore"
+        maxlength="6"
+      />
+    </view>
+    <view class="native-score-actions">
+      <view class="native-score-btn native-score-btn-cancel" bindtap="onCloseNumpad">取消</view>
+      <view class="native-score-btn native-score-btn-confirm" bindtap="onConfirmScore">确定</view>
+    </view>
+  </view>
+</view>
+
+<!-- 房间号弹窗 -->
+<view class="modal-mask" wx:if="{{showQR}}" bindtap="onCloseQR">
+    <view class="modal-content qr-modal" catchtap>
+      <view class="modal-header">
+        <text class="modal-title">房间信息</text>
+        <view class="modal-close" bindtap="onCloseQR">
+        <text class="modal-close-icon">×</text>
+      </view>
+    </view>
+    <view class="qr-body">
+      <view class="room-id-display">
+        <text class="room-id-label">房间号</text>
+        <text class="room-id-value">{{room.name}}</text>
+      </view>
+      <text class="qr-hint">请将房间号分享给其他玩家</text>
+      <view class="qr-copy" bindtap="onCopyRoomName"><text>复制房间号</text></view>
+    </view>
+  </view>
+</view>
+
+<!-- 添加玩家弹窗 -->
+<view class="modal-mask" wx:if="{{showAddPlayer}}" bindtap="onCloseAddPlayer">
+    <view class="modal-content" catchtap>
+      <view class="modal-header">
+        <text class="modal-title">添加玩家</text>
+        <view class="modal-close" bindtap="onCloseAddPlayer">
+        <text class="modal-close-icon">×</text>
+      </view>
+    </view>
+    <view class="modal-body">
+      <view class="form-item">
+        <text class="form-label">玩家昵称</text>
+        <input class="input" placeholder="请输入昵称" placeholder-class="input-placeholder" value="{{newPlayerName}}" bindinput="onNewPlayerInput" maxlength="12" />
+      </view>
+    </view>
+    <view class="modal-footer">
+      <view class="modal-btn modal-btn-cancel" bindtap="onCloseAddPlayer">取消</view>
+      <view class="modal-btn modal-btn-confirm" bindtap="onConfirmAddPlayer">添加</view>
+    </view>
+  </view>
+</view>
+
+<!-- 结算弹窗 -->
+<view class="modal-mask" wx:if="{{showSettlement}}" bindtap="onCloseSettlement">
+    <view class="modal-content" catchtap>
+      <view class="modal-header">
+        <text class="modal-title">结算清单</text>
+        <view class="modal-close" bindtap="onCloseSettlement">
+        <text class="modal-close-icon">×</text>
+      </view>
+    </view>
+    <view class="modal-body">
+      <view class="settlement-list" wx:if="{{settlementList.length > 0}}">
+        <view class="settlement-item" wx:for="{{settlementList}}" wx:key="index">
+          <text class="settlement-from">{{item.from}}</text>
+          <text class="settlement-arrow">→</text>
+          <text class="settlement-to">{{item.to}}</text>
+          <text class="settlement-amount">{{item.amount}}</text>
+        </view>
+      </view>
+      <view class="settlement-empty" wx:else>
+        <text class="settlement-empty-text">无需结算</text>
+      </view>
+    </view>
+    <view class="modal-footer">
+      <view class="modal-btn modal-btn-cancel" bindtap="onCloseSettlement">关闭</view>
+      <view class="modal-btn modal-btn-confirm" bindtap="onConfirmEndRoom">结束房间</view>
+    </view>
+  </view>
+</view>

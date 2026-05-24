@@ -1,0 +1,27 @@
+<view class="game-card {{theme === 'dark' ? 'dark' : ''}}" bindtap="onTap">
+  <view class="card-header">
+    <view class="card-title">
+      <text class="type-name">{{game.typeName}}</text>
+      <view class="status-tag {{game.status === 'finished' ? 'finished' : 'playing'}}">
+        {{game.status === 'finished' ? '已结束' : '进行中'}}
+      </view>
+    </view>
+    <text class="card-time">{{timeText}}</text>
+  </view>
+
+  <view class="card-body">
+    <view class="players-row">
+      <text class="player-name" wx:for="{{game.players}}" wx:key="id" wx:for-item="p">{{p.name}}</text>
+    </view>
+    <view class="info-row">
+      <text class="info-item" wx:if="{{game.location}}">{{game.location}}</text>
+      <text class="info-item">{{game.roundCount || (game.rounds ? game.rounds.length : 0)}} 局</text>
+      <text class="info-item" wx:if="{{game.baseScore > 1}}">底分 {{game.baseScore}}</text>
+    </view>
+  </view>
+
+  <view class="card-footer" wx:if="{{game.status === 'finished' && topPlayer}}">
+    <text class="footer-label">最佳：</text>
+    <text class="footer-value">{{topPlayer.name}} ({{topPlayer.score > 0 ? '+' : ''}}{{topPlayer.score}})</text>
+  </view>
+</view>

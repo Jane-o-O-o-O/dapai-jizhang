@@ -1,0 +1,73 @@
+/* 全局样式变量 */
+page {
+  --primary: #1AAD19;
+  --primary-light: #E8F5E9;
+  --accent: #FF6B35;
+  --danger: #E74C3C;
+  --warning: #F39C12;
+  --success: #27AE60;
+  --bg: #F5F5F5;
+  --card-bg: #FFFFFF;
+  --text-primary: #333333;
+  --text-secondary: #666666;
+  --text-hint: #999999;
+  --border: #EEEEEE;
+  --shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.08);
+  --radius: 16rpx;
+  --radius-sm: 8rpx;
+  --spacing: 24rpx;
+  --spacing-lg: 32rpx;
+
+  font-family: 'PingFang SC', 'Microsoft YaHei', 'SimHei', sans-serif;
+  font-size: 28rpx;
+  color: var(--text-primary);
+  background-color: var(--bg);
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Reset */
+view, text, image, input, button, navigator {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+button {
+  border: none;
+  outline: none;
+  background: transparent;
+  line-height: inherit;
+  font-size: inherit;
+}
+
+button::after {
+  display: none;
+}
+
+/* 输入框 */
+.input {
+  width: 100%;
+  padding: 20rpx 24rpx;
+  border: 2rpx solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 28rpx;
+  color: var(--text-primary);
+  background: #fff;
+  transition: border-color 0.2s;
+}
+
+.input:focus {
+  border-color: var(--primary);
+}
+
+/* 表单项 */
+.form-item {
+  margin-bottom: var(--spacing);
+}
+
+.form-label {
+  font-size: 26rpx;
+  color: var(--text-secondary);
+  margin-bottom: 12rpx;
+}

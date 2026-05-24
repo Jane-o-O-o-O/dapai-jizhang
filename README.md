@@ -15,6 +15,14 @@
 
 > 本项目仅用于便捷记账与复盘统计，不得用于赌博、金钱交易或任何违法违规用途。
 
+## 界面预览
+
+<p align="center">
+  <img src="docs/screenshots/home.png" width="30%" alt="首页与统计" />
+  <img src="docs/screenshots/room.png" width="30%" alt="房间记分" />
+  <img src="docs/screenshots/settlement.png" width="30%" alt="结算与历史" />
+</p>
+
 ## 一句话说明
 
 朋友开局时快速建房，牌局过程中点头像记分，结束时自动算出谁该向谁结算，之后还能回到历史记录里查每一局。

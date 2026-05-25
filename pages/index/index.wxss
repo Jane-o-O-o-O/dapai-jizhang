@@ -350,32 +350,11 @@ page {
   border-top: 1rpx solid var(--border);
 }
 
-.history-icon {
-  width: 36rpx;
-  height: 36rpx;
-  color: var(--gold);
-  margin-right: 16rpx;
-  flex-shrink: 0;
-  font-size: 32rpx;
-  line-height: 36rpx;
-  text-align: center;
-}
-
 .history-text {
   flex: 1;
   font-size: 30rpx;
   color: var(--cream);
   letter-spacing: 2rpx;
-  text-align: center;
-}
-
-.history-arrow {
-  width: 28rpx;
-  height: 28rpx;
-  color: var(--text-dim);
-  flex-shrink: 0;
-  font-size: 30rpx;
-  line-height: 28rpx;
   text-align: center;
 }
 
@@ -499,7 +478,116 @@ page {
   border-radius: 6rpx;
 }
 
+/* ========== 加入房间弹窗 ========== */
+
+.join-modal {
+  width: 82%;
+  min-height: 430rpx;
+}
+
+.join-modal .modal-body {
+  padding: 40rpx 32rpx 44rpx;
+}
+
+.join-scan-btn {
+  height: 96rpx;
+  border-radius: 12rpx;
+  background: linear-gradient(135deg, var(--gold) 0%, #8b6914 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.join-scan-btn:active {
+  opacity: 0.75;
+}
+
+.join-scan-text {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #fff;
+  letter-spacing: 2rpx;
+}
+
+.container.dark .join-scan-text {
+  color: #0a0a0a;
+}
+
+.join-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 28rpx 0 20rpx;
+}
+
+.join-divider::before,
+.join-divider::after {
+  content: '';
+  flex: 1;
+  height: 1rpx;
+  background: var(--border);
+}
+
+.join-divider-text {
+  padding: 0 20rpx;
+  font-size: 24rpx;
+  color: var(--text-dim);
+  letter-spacing: 1rpx;
+}
+
+.join-input {
+  box-sizing: border-box;
+  height: 92rpx;
+  padding: 0 24rpx;
+  text-align: center;
+  letter-spacing: 4rpx;
+  text-transform: uppercase;
+}
+
 /* ========== 编辑弹窗 ========== */
+
+.edit-profile-modal {
+  min-height: 520rpx;
+}
+
+.edit-profile-modal .modal-body {
+  padding: 44rpx 32rpx 56rpx;
+}
+
+.edit-profile-modal .modal-body .form-item {
+  margin-bottom: 40rpx;
+}
+
+.edit-profile-modal .modal-body .form-item:last-child {
+  margin-bottom: 0;
+}
+
+.edit-profile-modal .modal-body .input {
+  height: 88rpx;
+  min-height: 88rpx;
+  padding: 0 24rpx;
+  line-height: 88rpx;
+  box-sizing: border-box;
+}
+
+.edit-profile-modal .avatar-upload,
+.edit-profile-modal .upload-preview,
+.edit-profile-modal .upload-placeholder {
+  width: 200rpx;
+  height: 200rpx;
+  min-width: 200rpx;
+  min-height: 200rpx;
+  max-width: 200rpx;
+  max-height: 200rpx;
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+.edit-profile-modal .upload-preview {
+  object-fit: cover;
+}
 
 .modal-mask {
   position: fixed;

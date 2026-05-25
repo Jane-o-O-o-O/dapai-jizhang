@@ -7,6 +7,8 @@ Page({
     userStats: { totalGames: 0, winCount: 0, winRate: 0 },
     activeRooms: [],
     showEditModal: false,
+    showJoinModal: false,
+    joinRoomCode: '',
     editNickname: '',
     editAvatarUrl: ''
   },
@@ -88,27 +90,79 @@ Page({
     wx.redirectTo({ url: '/pages/room/room?id=' + room.id })
   },
 
+  onOpenJoinModal: function () {
+    this.setData({
+      showJoinModal: true,
+      joinRoomCode: ''
+    })
+  },
+
+  onCloseJoinModal: function () {
+    this.setData({
+      showJoinModal: false,
+      joinRoomCode: ''
+    })
+  },
+
+  onJoinRoomInput: function (e) {
+    var value = (e.detail.value || '').trim().toUpperCase()
+    this.setData({ joinRoomCode: value })
+  },
+
+  onJoinByCode: function () {
+    this.enterRoomByCode(this.data.joinRoomCode)
+  },
+
   onScanEnter: function () {
+    var that = this
     wx.scanCode({
       onlyFromCamera: false,
       success: function (res) {
-        var result = res.result
-        if (result && result.indexOf('poker_room:') === 0) {
-          var roomId = result.replace('poker_room:', '')
-          var room = storage.getRoomById(roomId)
-          if (room) {
-            wx.navigateTo({ url: '/pages/room/room?id=' + roomId })
-          } else {
-            wx.showToast({ title: '房间不存在', icon: 'none' })
-          }
-        } else {
-          wx.showToast({ title: '无效的房间码', icon: 'none' })
-        }
+        that.enterRoomByCode(res.result)
       },
       fail: function () {
         wx.showToast({ title: '扫码取消', icon: 'none' })
       }
     })
+  },
+
+  enterRoomByCode: function (code) {
+    var room = this.findRoomByCode(code)
+    if (!room) {
+      wx.showToast({ title: '房间不存在', icon: 'none' })
+      return
+    }
+
+    this.setData({
+      showJoinModal: false,
+      joinRoomCode: ''
+    })
+    wx.navigateTo({ url: '/pages/room/room?id=' + room.id })
+  },
+
+  findRoomByCode: function (code) {
+    var value = (code || '').trim()
+    if (!value) {
+      wx.showToast({ title: '请输入房间码', icon: 'none' })
+      return null
+    }
+
+    if (value.indexOf('poker_room:') === 0) {
+      value = value.replace('poker_room:', '')
+    }
+
+    var room = storage.getRoomById(value)
+    if (room) return room
+
+    var roomName = value.toUpperCase()
+    var rooms = storage.getRooms()
+    for (var i = 0; i < rooms.length; i++) {
+      if ((rooms[i].name || '').toUpperCase() === roomName) {
+        return storage.getRoomById(rooms[i].id) || rooms[i]
+      }
+    }
+
+    return null
   },
 
   goHistory: function () {

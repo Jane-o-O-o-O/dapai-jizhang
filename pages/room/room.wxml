@@ -39,12 +39,28 @@
       <text class="score-count">共 {{room.rounds.length}} 笔</text>
     </view>
 
-    <view class="rounds-list" wx:if="{{room.rounds.length > 0}}">
-      <view class="round-item" wx:for="{{room.rounds}}" wx:key="id" wx:for-item="round" wx:for-index="rIdx">
-        <text class="round-note">{{round.note}}</text>
-        <text class="round-amount">{{round.amount}}</text>
-        <view class="round-delete" catchtap="onDeleteRound" data-id="{{round.id}}">
-          <text class="round-delete-icon">×</text>
+    <view class="rounds-list" wx:if="{{displayRounds.length > 0}}">
+      <view class="round-message {{round.isMine ? 'round-message-mine' : 'round-message-other'}}" wx:for="{{displayRounds}}" wx:key="id" wx:for-item="round">
+        <view class="round-meta">
+          <text class="round-actor">{{round.actorName}}</text>
+          <text class="round-time">{{round.timeText}}</text>
+        </view>
+        <view class="round-row">
+          <view class="round-avatar">
+            <image wx:if="{{round.actorAvatarUrl}}" class="round-avatar-img" src="{{round.actorAvatarUrl}}" mode="aspectFill" />
+            <view wx:else class="round-avatar-default">
+              <text class="round-avatar-char">{{round.actorInitial}}</text>
+            </view>
+          </view>
+          <view class="round-bubble">
+            <text class="round-direction">向</text>
+            <text class="round-target">{{round.targetName}}</text>
+            <text class="round-action">转账</text>
+            <text class="round-amount">{{round.amount}}</text>
+          </view>
+          <view class="round-delete" catchtap="onDeleteRound" data-id="{{round.id}}">
+            <text class="round-delete-icon">×</text>
+          </view>
         </view>
       </view>
     </view>
@@ -57,11 +73,9 @@
   <!-- 底部操作栏 -->
   <view class="bottom-bar">
     <view class="bottom-btn btn-qr" bindtap="onShowQR">
-      <text class="bottom-icon">▦</text>
-      <text class="bottom-text">二维码</text>
+      <text class="bottom-text">房间二维码</text>
     </view>
     <view class="bottom-btn btn-end" bindtap="onSettlement">
-      <text class="bottom-icon">□</text>
       <text class="bottom-text">结算</text>
     </view>
   </view>

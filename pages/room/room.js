@@ -5,6 +5,7 @@ Page({
     theme: 'light',
     roomId: '',
     room: { players: [], rounds: [], status: 'playing' },
+    displayRounds: [],
     showNumpad: false,
     scoringPlayer: {},
     scoringIndex: 0,
@@ -46,7 +47,54 @@ Page({
     for (var i = 0; i < room.players.length; i++) {
       room.players[i].initial = room.players[i].name.charAt(0)
     }
-    this.setData({ room: room })
+    this.setData({
+      room: room,
+      displayRounds: this.buildDisplayRounds(room)
+    })
+  },
+
+  buildDisplayRounds: function (room) {
+    var players = room.players || []
+    var ownerId = players[0] ? players[0].id : ''
+    var playersById = {}
+    for (var i = 0; i < players.length; i++) {
+      playersById[players[i].id] = players[i]
+    }
+
+    var rounds = (room.rounds || []).slice().reverse()
+    var displayRounds = []
+    for (var j = 0; j < rounds.length; j++) {
+      var round = rounds[j]
+      var scores = round.scores || {}
+      var sourceId = ''
+      var targetId = ''
+      var amount = Math.abs(round.amount || 0)
+
+      for (var pid in scores) {
+        if (scores[pid] < 0) sourceId = pid
+        if (scores[pid] > 0) {
+          targetId = pid
+          if (!amount) amount = Math.abs(scores[pid])
+        }
+      }
+
+      var source = playersById[sourceId] || { name: '未知', avatarUrl: '' }
+      var target = playersById[targetId] || { name: '未知', avatarUrl: '' }
+      var sourceName = source.name || '未知'
+
+      displayRounds.push({
+        id: round.id,
+        isMine: sourceId === ownerId,
+        actorName: sourceName,
+        actorAvatarUrl: source.avatarUrl || '',
+        actorInitial: source.initial || sourceName.charAt(0),
+        targetName: target.name || '未知',
+        amount: amount,
+        timeText: storage.formatDate(round.createdAt, 'YYYY-MM-DD HH:mm:ss')
+      })
+    }
+
+    return displayRounds
   },
 
   onPlayerAvatarError: function (e) {

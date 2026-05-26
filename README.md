@@ -129,3 +129,9 @@ flowchart LR
 ## 合规声明
 
 本项目是记账工具，不是博彩、支付或资金结算平台。项目中的“积分”“结算清单”等信息仅作为线下用户自行核对的记录参考，不代表真实资金交易指令，也不构成任何交易担保。
+
+## 赞赏支持
+
+<p align="center">
+  <img src="docs/screenshots/reward-code.jpg" width="320" alt="赞赏码" />
+</p>

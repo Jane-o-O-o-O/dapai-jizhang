@@ -61,7 +61,22 @@ Page({
       playersById[players[i].id] = players[i]
     }
 
-    var rounds = (room.rounds || []).slice().reverse()
+    var roundGroups = {}
+    var sourceRounds = room.rounds || []
+    var periodStartTime = 0
+    var periodIndex = -1
+    var periodDuration = 2 * 60 * 1000
+
+    for (var g = 0; g < sourceRounds.length; g++) {
+      var createdAt = sourceRounds[g].createdAt || 0
+      if (periodIndex < 0 || createdAt - periodStartTime >= periodDuration) {
+        periodIndex++
+        periodStartTime = createdAt
+      }
+      roundGroups[sourceRounds[g].id] = periodIndex
+    }
+
+    var rounds = sourceRounds.slice().reverse()
     var displayRounds = []
     for (var j = 0; j < rounds.length; j++) {
       var round = rounds[j]
@@ -81,9 +96,12 @@ Page({
       var source = playersById[sourceId] || { name: '未知', avatarUrl: '' }
       var target = playersById[targetId] || { name: '未知', avatarUrl: '' }
       var sourceName = source.name || '未知'
+      var nextRound = rounds[j + 1]
+      var periodGroup = roundGroups[round.id]
 
       displayRounds.push({
         id: round.id,
+        hasPeriodGap: !!nextRound && periodGroup !== roundGroups[nextRound.id],
         isMine: sourceId === ownerId,
         actorName: sourceName,
         actorAvatarUrl: source.avatarUrl || '',

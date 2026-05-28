@@ -40,7 +40,7 @@
     </view>
 
     <view class="rounds-list" wx:if="{{displayRounds.length > 0}}">
-      <view class="round-message {{round.isMine ? 'round-message-mine' : 'round-message-other'}}" wx:for="{{displayRounds}}" wx:key="id" wx:for-item="round">
+      <view class="round-message {{round.isMine ? 'round-message-mine' : 'round-message-other'}} {{round.hasPeriodGap ? 'round-period-gap' : ''}}" wx:for="{{displayRounds}}" wx:key="id" wx:for-item="round">
         <view class="round-meta">
           <text class="round-actor">{{round.actorName}}</text>
           <text class="round-time">{{round.timeText}}</text>
@@ -146,7 +146,7 @@
     <view class="modal-body">
       <view class="form-item">
         <text class="form-label">玩家昵称</text>
-        <input class="input" placeholder="请输入昵称" placeholder-class="input-placeholder" value="{{newPlayerName}}" bindinput="onNewPlayerInput" maxlength="12" />
+        <input class="input player-name-input" placeholder="请输入昵称" placeholder-class="input-placeholder" value="{{newPlayerName}}" bindinput="onNewPlayerInput" maxlength="12" />
       </view>
     </view>
     <view class="modal-footer">

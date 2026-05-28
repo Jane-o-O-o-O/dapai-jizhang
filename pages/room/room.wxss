@@ -217,6 +217,10 @@ page {
   flex-direction: column;
 }
 
+.round-period-gap {
+  margin-bottom: 34rpx;
+}
+
 .round-message-mine {
   align-items: flex-end;
 }
@@ -620,6 +624,14 @@ page {
   font-size: 28rpx;
   color: var(--cream);
   background: #faf7f2;
+}
+
+.modal-body .player-name-input {
+  height: 72rpx;
+  line-height: 72rpx;
+  padding-top: 0;
+  padding-bottom: 0;
+  box-sizing: border-box;
 }
 
 .container.dark .modal-body .input {

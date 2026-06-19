@@ -1,4 +1,5 @@
 var storage = require('../../utils/storage')
+var api = require('../../utils/api')
 
 Page({
   data: {
@@ -37,13 +38,23 @@ Page({
   },
 
   loadRoom: function () {
-    var profile = storage.getUserProfile()
-    var room = storage.syncRoomOwnerProfile(this.data.roomId, profile)
-    if (!room) {
-      wx.showToast({ title: '房间不存在', icon: 'none' })
-      setTimeout(function () { wx.reLaunch({ url: '/pages/index/index' }) }, 1500)
-      return
-    }
+    var that = this
+    api.getRoom(this.data.roomId).then(function (room) {
+      storage.saveRoom(room)
+      that.applyRoom(room)
+    }).catch(function () {
+      var profile = storage.getUserProfile()
+      var room = storage.syncRoomOwnerProfile(that.data.roomId, profile)
+      if (!room) {
+        wx.showToast({ title: '房间不存在', icon: 'none' })
+        setTimeout(function () { wx.reLaunch({ url: '/pages/index/index' }) }, 1500)
+        return
+      }
+      that.applyRoom(room)
+    })
+  },
+
+  applyRoom: function (room) {
     for (var i = 0; i < room.players.length; i++) {
       room.players[i].initial = room.players[i].name.charAt(0)
     }
@@ -181,19 +192,18 @@ Page({
 
     var sourceId = this.data.room.players[0].id
     var targetId = this.data.scoringPlayer.id
-    var sourceName = this.data.room.players[0].name
-    var targetName = this.data.scoringPlayer.name
-
-    var scores = {}
-    scores[sourceId] = -value
-    scores[targetId] = value
-
-    var note = sourceName + ' → ' + targetName
-
-    storage.addRoomRound(this.data.roomId, scores, note, value)
     wx.hideKeyboard()
-    this.setData({ showNumpad: false })
-    this.loadRoom()
+    wx.showLoading({ title: '保存中' })
+    var that = this
+    api.addRound(this.data.roomId, sourceId, targetId, value).then(function (room) {
+      wx.hideLoading()
+      storage.saveRoom(room)
+      that.setData({ showNumpad: false })
+      that.applyRoom(room)
+    }).catch(function () {
+      wx.hideLoading()
+      wx.showToast({ title: '保存失败', icon: 'none' })
+    })
   },
 
   // ========== 添加玩家 ==========
@@ -216,9 +226,20 @@ Page({
       wx.showToast({ title: '请输入昵称', icon: 'none' })
       return
     }
-    storage.addPlayerToRoom(this.data.roomId, name, '')
-    this.setData({ showAddPlayer: false })
-    this.loadRoom()
+    wx.showLoading({ title: '添加中' })
+    var that = this
+    api.addPlayer(this.data.roomId, {
+      name: name,
+      avatarUrl: ''
+    }).then(function (room) {
+      wx.hideLoading()
+      storage.saveRoom(room)
+      that.setData({ showAddPlayer: false })
+      that.applyRoom(room)
+    }).catch(function () {
+      wx.hideLoading()
+      wx.showToast({ title: '添加失败', icon: 'none' })
+    })
   },
 
   // ========== 删除记录 ==========
@@ -231,8 +252,15 @@ Page({
       content: '删除这条记录？',
       success: function (res) {
         if (res.confirm) {
-          storage.deleteRoomRound(that.data.roomId, roundId)
-          that.loadRoom()
+          wx.showLoading({ title: '删除中' })
+          api.deleteRound(that.data.roomId, roundId).then(function (room) {
+            wx.hideLoading()
+            storage.saveRoom(room)
+            that.applyRoom(room)
+          }).catch(function () {
+            wx.hideLoading()
+            wx.showToast({ title: '删除失败', icon: 'none' })
+          })
         }
       }
     })
@@ -263,55 +291,17 @@ Page({
       wx.showToast({ title: '至少需要2名玩家', icon: 'none' })
       return
     }
-
-    // 计算每个人的净积分
-    var balances = []
-    for (var i = 0; i < players.length; i++) {
-      balances.push({
-        id: players[i].id,
-        name: players[i].name,
-        score: players[i].score
+    var that = this
+    wx.showLoading({ title: '结算中' })
+    api.getSettlement(this.data.roomId).then(function (settlementList) {
+      wx.hideLoading()
+      that.setData({
+        showSettlement: true,
+        settlementList: settlementList
       })
-    }
-
-    // 分为欠款人和收款人
-    var debtors = [] // 负分，需要付钱
-    var creditors = [] // 正分，需要收钱
-
-    for (var i = 0; i < balances.length; i++) {
-      if (balances[i].score < 0) {
-        debtors.push({ id: balances[i].id, name: balances[i].name, amount: -balances[i].score })
-      } else if (balances[i].score > 0) {
-        creditors.push({ id: balances[i].id, name: balances[i].name, amount: balances[i].score })
-      }
-    }
-
-    // 按金额排序，优化结算
-    debtors.sort(function (a, b) { return b.amount - a.amount })
-    creditors.sort(function (a, b) { return b.amount - a.amount })
-
-    // 生成结算列表
-    var settlementList = []
-    var i = 0, j = 0
-    while (i < debtors.length && j < creditors.length) {
-      var amount = Math.min(debtors[i].amount, creditors[j].amount)
-      if (amount > 0) {
-        settlementList.push({
-          from: debtors[i].name,
-          to: creditors[j].name,
-          amount: amount
-        })
-      }
-      debtors[i].amount -= amount
-      creditors[j].amount -= amount
-
-      if (debtors[i].amount === 0) i++
-      if (creditors[j].amount === 0) j++
-    }
-
-    this.setData({
-      showSettlement: true,
-      settlementList: settlementList
+    }).catch(function () {
+      wx.hideLoading()
+      wx.showToast({ title: '结算失败', icon: 'none' })
     })
   },
 
@@ -326,9 +316,16 @@ Page({
       content: '确定结束当前房间？',
       success: function (res) {
         if (res.confirm) {
-          storage.finishRoom(that.data.roomId)
-          wx.showToast({ title: '已结束', icon: 'success' })
-          setTimeout(function () { wx.reLaunch({ url: '/pages/index/index' }) }, 1500)
+          wx.showLoading({ title: '结束中' })
+          api.finishRoom(that.data.roomId).then(function (room) {
+            wx.hideLoading()
+            storage.saveRoom(room)
+            wx.showToast({ title: '已结束', icon: 'success' })
+            setTimeout(function () { wx.reLaunch({ url: '/pages/index/index' }) }, 1500)
+          }).catch(function () {
+            wx.hideLoading()
+            wx.showToast({ title: '结束失败', icon: 'none' })
+          })
         }
       }
     })

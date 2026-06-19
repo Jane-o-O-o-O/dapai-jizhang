@@ -1,9 +1,14 @@
-// app.js
 const storage = require('./utils/storage')
 
 App({
-  onLaunch() {
-    // 初始化存储
+  onLaunch: function () {
+    if (wx.cloud) {
+      wx.cloud.init({
+        env: 'prod-d4g4lbypz81013dea',
+        traceUser: true
+      })
+    }
+
     storage.init()
   },
 

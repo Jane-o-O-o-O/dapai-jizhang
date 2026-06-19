@@ -1,4 +1,5 @@
 const storage = require('../../utils/storage')
+const api = require('../../utils/api')
 
 Page({
   data: {
@@ -86,8 +87,19 @@ Page({
       wx.showToast({ title: '请先设置昵称', icon: 'none' })
       return
     }
-    var room = storage.createRoom(profile.nickname, profile.avatarUrl)
-    wx.redirectTo({ url: '/pages/room/room?id=' + room.id })
+    wx.showLoading({ title: '创建中' })
+    api.createRoom({
+      name: profile.nickname,
+      nickname: profile.nickname,
+      avatarUrl: profile.avatarUrl
+    }).then(function (room) {
+      wx.hideLoading()
+      storage.saveRoom(room)
+      wx.redirectTo({ url: '/pages/room/room?id=' + room.id })
+    }).catch(function () {
+      wx.hideLoading()
+      wx.showToast({ title: '创建失败', icon: 'none' })
+    })
   },
 
   onOpenJoinModal: function () {
@@ -127,17 +139,48 @@ Page({
   },
 
   enterRoomByCode: function (code) {
-    var room = this.findRoomByCode(code)
-    if (!room) {
-      wx.showToast({ title: '房间不存在', icon: 'none' })
+    var value = (code || '').trim()
+    var profile = storage.getUserProfile()
+    var that = this
+
+    if (!value) {
+      wx.showToast({ title: '请输入房间码', icon: 'none' })
       return
     }
 
-    this.setData({
-      showJoinModal: false,
-      joinRoomCode: ''
+    if (!profile.nickname) {
+      wx.showToast({ title: '请先设置昵称', icon: 'none' })
+      this.setData({
+        showJoinModal: false,
+        showEditModal: true,
+        editNickname: '',
+        editAvatarUrl: profile.avatarUrl
+      })
+      return
+    }
+
+    if (value.indexOf('poker_room:') === 0) {
+      value = value.replace('poker_room:', '')
+    }
+
+    wx.showLoading({ title: '进入中' })
+    api.getRoomByCode(value).then(function (room) {
+      return api.addPlayer(room.id, {
+        name: profile.nickname,
+        avatarUrl: profile.avatarUrl
+      })
+    }).then(function (room) {
+      wx.hideLoading()
+      storage.saveRoom(room)
+      that.setData({
+        showJoinModal: false,
+        joinRoomCode: ''
+      })
+      wx.navigateTo({ url: '/pages/room/room?id=' + room.id })
+    }).catch(function () {
+      wx.hideLoading()
+      wx.showToast({ title: '房间不存在', icon: 'none' })
     })
-    wx.navigateTo({ url: '/pages/room/room?id=' + room.id })
   },
 
   findRoomByCode: function (code) {

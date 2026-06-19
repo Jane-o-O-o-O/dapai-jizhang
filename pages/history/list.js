@@ -1,4 +1,5 @@
 const storage = require('../../utils/storage')
+const api = require('../../utils/api')
 
 Page({
   data: {
@@ -143,7 +144,18 @@ Page({
       wx.showToast({ title: '请先设置昵称', icon: 'none' })
       return
     }
-    var room = storage.createRoom(profile.nickname, profile.avatarUrl)
-    wx.redirectTo({ url: '/pages/room/room?id=' + room.id })
+    wx.showLoading({ title: '创建中' })
+    api.createRoom({
+      name: profile.nickname,
+      nickname: profile.nickname,
+      avatarUrl: profile.avatarUrl
+    }).then(function (room) {
+      wx.hideLoading()
+      storage.saveRoom(room)
+      wx.redirectTo({ url: '/pages/room/room?id=' + room.id })
+    }).catch(function () {
+      wx.hideLoading()
+      wx.showToast({ title: '创建失败', icon: 'none' })
+    })
   }
 })

@@ -11,3 +11,9 @@ Thumbs.db
 node_modules/
 dist/
 miniprogram_npm/
+
+# Server runtime files
+server/.env
+server/data/
+server/*.log
+server/server-test.*

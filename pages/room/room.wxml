@@ -39,28 +39,12 @@
       <text class="score-count">共 {{room.rounds.length}} 笔</text>
     </view>
 
-    <view class="rounds-list" wx:if="{{displayRounds.length > 0}}">
-      <view class="round-message {{round.isMine ? 'round-message-mine' : 'round-message-other'}} {{round.hasPeriodGap ? 'round-period-gap' : ''}}" wx:for="{{displayRounds}}" wx:key="id" wx:for-item="round">
-        <view class="round-meta">
-          <text class="round-actor">{{round.actorName}}</text>
-          <text class="round-time">{{round.timeText}}</text>
-        </view>
-        <view class="round-row">
-          <view class="round-avatar">
-            <image wx:if="{{round.actorAvatarUrl}}" class="round-avatar-img" src="{{round.actorAvatarUrl}}" mode="aspectFill" />
-            <view wx:else class="round-avatar-default">
-              <text class="round-avatar-char">{{round.actorInitial}}</text>
-            </view>
-          </view>
-          <view class="round-bubble">
-            <text class="round-direction">向</text>
-            <text class="round-target">{{round.targetName}}</text>
-            <text class="round-action">转账</text>
-            <text class="round-amount">{{round.amount}}</text>
-          </view>
-          <view class="round-delete" catchtap="onDeleteRound" data-id="{{round.id}}">
-            <text class="round-delete-icon">×</text>
-          </view>
+    <view class="rounds-list" wx:if="{{room.rounds.length > 0}}">
+      <view class="round-item" wx:for="{{room.rounds}}" wx:key="id" wx:for-item="round" wx:for-index="rIdx">
+        <text class="round-note">{{round.note}}</text>
+        <text class="round-amount">{{round.amount}}</text>
+        <view class="round-delete" catchtap="onDeleteRound" data-id="{{round.id}}">
+          <svg style="width:28rpx;height:28rpx;" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
         </view>
       </view>
     </view>
@@ -73,9 +57,11 @@
   <!-- 底部操作栏 -->
   <view class="bottom-bar">
     <view class="bottom-btn btn-qr" bindtap="onShowQR">
-      <text class="bottom-text">房间二维码</text>
+      <svg class="bottom-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="3" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="14" y="3" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="3" y="14" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="14" y="14" width="3" height="3" fill="currentColor"/><rect x="18" y="18" width="3" height="3" fill="currentColor"/><rect x="14" y="18" width="3" height="3" fill="currentColor"/><rect x="18" y="14" width="3" height="3" fill="currentColor"/></svg>
+      <text class="bottom-text">二维码</text>
     </view>
     <view class="bottom-btn btn-end" bindtap="onSettlement">
+      <svg class="bottom-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="4" width="16" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
       <text class="bottom-text">结算</text>
     </view>
   </view>
@@ -83,12 +69,12 @@
 
 <!-- 转账输入弹窗 -->
 <view class="modal-mask transfer-mask" wx:if="{{showNumpad}}" bindtap="onCloseNumpad">
-    <view class="transfer-modal" catchtap>
-      <text class="transfer-title">记账</text>
+  <view class="transfer-modal" catchtap style="height: 606rpx; display: block; box-sizing: border-box">
+    <text class="transfer-title">记账</text>
     <view class="native-score-avatar-wrap">
-      <image wx:if="{{scoringPlayer.avatarUrl}}" class="player-avatar native-score-avatar" src="{{scoringPlayer.avatarUrl}}" mode="aspectFill" binderror="onScoringAvatarError" />
-      <view wx:else class="player-avatar player-avatar-default native-score-avatar">
-        <text class="player-avatar-char">{{scoringPlayer.initial}}</text>
+      <image wx:if="{{scoringPlayer.avatarUrl}}" class="native-score-avatar" src="{{scoringPlayer.avatarUrl}}" mode="aspectFill" />
+      <view wx:else class="native-score-avatar native-score-avatar-default">
+        <text class="native-score-avatar-char">{{scoringPlayer.initial}}</text>
       </view>
     </view>
     <text class="transfer-target">{{scoringPlayer.name}}</text>
@@ -116,11 +102,11 @@
 
 <!-- 房间号弹窗 -->
 <view class="modal-mask" wx:if="{{showQR}}" bindtap="onCloseQR">
-    <view class="modal-content qr-modal" catchtap>
-      <view class="modal-header">
-        <text class="modal-title">房间信息</text>
-        <view class="modal-close" bindtap="onCloseQR">
-        <text class="modal-close-icon">×</text>
+  <view class="modal-content qr-modal" catchtap>
+    <view class="modal-header">
+      <text class="modal-title">房间信息</text>
+      <view class="modal-close" bindtap="onCloseQR">
+        <svg style="width:28rpx;height:28rpx;display:block;" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
       </view>
     </view>
     <view class="qr-body">
@@ -136,17 +122,17 @@
 
 <!-- 添加玩家弹窗 -->
 <view class="modal-mask" wx:if="{{showAddPlayer}}" bindtap="onCloseAddPlayer">
-    <view class="modal-content" catchtap>
-      <view class="modal-header">
-        <text class="modal-title">添加玩家</text>
-        <view class="modal-close" bindtap="onCloseAddPlayer">
-        <text class="modal-close-icon">×</text>
+  <view class="modal-content" catchtap>
+    <view class="modal-header">
+      <text class="modal-title">添加玩家</text>
+      <view class="modal-close" bindtap="onCloseAddPlayer">
+        <svg style="width:28rpx;height:28rpx;display:block;" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
       </view>
     </view>
     <view class="modal-body">
       <view class="form-item">
         <text class="form-label">玩家昵称</text>
-        <input class="input player-name-input" placeholder="请输入昵称" placeholder-class="input-placeholder" value="{{newPlayerName}}" bindinput="onNewPlayerInput" maxlength="12" />
+        <input class="input" placeholder="请输入昵称" placeholder-class="input-placeholder" value="{{newPlayerName}}" bindinput="onNewPlayerInput" maxlength="12" />
       </view>
     </view>
     <view class="modal-footer">
@@ -158,11 +144,11 @@
 
 <!-- 结算弹窗 -->
 <view class="modal-mask" wx:if="{{showSettlement}}" bindtap="onCloseSettlement">
-    <view class="modal-content" catchtap>
-      <view class="modal-header">
-        <text class="modal-title">结算清单</text>
-        <view class="modal-close" bindtap="onCloseSettlement">
-        <text class="modal-close-icon">×</text>
+  <view class="modal-content" catchtap>
+    <view class="modal-header">
+      <text class="modal-title">结算清单</text>
+      <view class="modal-close" bindtap="onCloseSettlement">
+        <svg style="width:28rpx;height:28rpx;display:block;" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
       </view>
     </view>
     <view class="modal-body">

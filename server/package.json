@@ -1,0 +1,19 @@
+{
+  "name": "dapai-jizhang-server",
+  "version": "0.1.0",
+  "private": true,
+  "description": "SQLite API server for dapai-jizhang mini program",
+  "main": "src/app.js",
+  "scripts": {
+    "prestart": "node --version",
+    "start": "node src/app.js",
+    "dev": "node --watch src/app.js",
+    "check": "node --check src/app.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  },
+  "engines": {
+    "node": ">=22.5"
+  }
+}

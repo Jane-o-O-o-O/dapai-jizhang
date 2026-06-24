@@ -153,9 +153,9 @@ Page({
       wx.hideLoading()
       storage.saveRoom(room)
       wx.redirectTo({ url: '/pages/room/room?id=' + room.id })
-    }).catch(function () {
+    }).catch(function (err) {
       wx.hideLoading()
-      wx.showToast({ title: '创建失败', icon: 'none' })
+      wx.showToast({ title: api.getErrorMessage(err, '创建失败'), icon: 'none' })
     })
   }
 })

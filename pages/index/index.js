@@ -1,7 +1,10 @@
 const storage = require('../../utils/storage')
 const api = require('../../utils/api')
+const roomEntry = require('../../utils/room-entry')
 
 Page({
+  pendingJoinAction: null,
+
   data: {
     theme: 'light',
     profile: { nickname: '', avatarUrl: '' },
@@ -87,18 +90,37 @@ Page({
       wx.showToast({ title: '请先设置昵称', icon: 'none' })
       return
     }
+    if (!profile.avatarUrl) {
+      wx.showToast({ title: '请先添加头像', icon: 'none' })
+      this.setData({
+        showEditModal: true,
+        editNickname: profile.nickname,
+        editAvatarUrl: ''
+      })
+      return
+    }
     wx.showLoading({ title: '创建中' })
-    api.createRoom({
-      name: profile.nickname,
+    api.saveMyProfile({
       nickname: profile.nickname,
       avatarUrl: profile.avatarUrl
+    }).then(function () {
+      return api.createRoom({
+        name: profile.nickname,
+        nickname: profile.nickname,
+        avatarUrl: profile.avatarUrl
+      })
     }).then(function (room) {
       wx.hideLoading()
       storage.saveRoom(room)
       wx.redirectTo({ url: '/pages/room/room?id=' + room.id })
-    }).catch(function () {
+    }).catch(function (err) {
       wx.hideLoading()
-      wx.showToast({ title: '创建失败', icon: 'none' })
+      console.error('create room failed', err)
+      wx.showModal({
+        title: api.getErrorMessage(err, '创建失败'),
+        content: api.getErrorDetail(err),
+        showCancel: false
+      })
     })
   },
 
@@ -130,7 +152,7 @@ Page({
     wx.scanCode({
       onlyFromCamera: false,
       success: function (res) {
-        that.enterRoomByCode(res.result)
+        that.enterRoomByScanResult(res)
       },
       fail: function () {
         wx.showToast({ title: '扫码取消', icon: 'none' })
@@ -138,9 +160,52 @@ Page({
     })
   },
 
+  enterRoomByScanResult: function (res) {
+    var entry = roomEntry.getEntryFromScanResult(res)
+    if (entry.roomId) {
+      this.enterRoomById(entry.roomId)
+      return
+    }
+    this.enterRoomByCode(entry.roomCode)
+  },
+
+  enterRoomById: function (roomId) {
+    var value = String(roomId || '').trim()
+    var that = this
+
+    if (!value) {
+      wx.showToast({ title: '房间不存在', icon: 'none' })
+      return
+    }
+
+    this.ensureProfileBeforeJoin(function (profile) {
+      that.joinRoomById(value, profile)
+    })
+  },
+
+  joinRoomById: function (roomId, profile) {
+    var that = this
+    wx.showLoading({ title: '进入中' })
+    api.addPlayer(roomId, {
+      name: profile.nickname,
+      avatarUrl: profile.avatarUrl
+    }).then(function (room) {
+      wx.hideLoading()
+      storage.saveRoom(room)
+      that.setData({
+        showJoinModal: false,
+        joinRoomCode: ''
+      })
+      wx.navigateTo({ url: '/pages/room/room?id=' + room.id })
+    }).catch(function (err) {
+      wx.hideLoading()
+      console.error('enter room failed', err)
+      wx.showToast({ title: api.getErrorMessage(err, '进入失败'), icon: 'none' })
+    })
+  },
+
   enterRoomByCode: function (code) {
     var value = (code || '').trim()
-    var profile = storage.getUserProfile()
     var that = this
 
     if (!value) {
@@ -148,23 +213,16 @@ Page({
       return
     }
 
-    if (!profile.nickname) {
-      wx.showToast({ title: '请先设置昵称', icon: 'none' })
-      this.setData({
-        showJoinModal: false,
-        showEditModal: true,
-        editNickname: '',
-        editAvatarUrl: profile.avatarUrl
-      })
-      return
-    }
+    value = roomEntry.normalizeRoomCode(value)
+    this.ensureProfileBeforeJoin(function (profile) {
+      that.joinRoomByCode(value, profile)
+    })
+  },
 
-    if (value.indexOf('poker_room:') === 0) {
-      value = value.replace('poker_room:', '')
-    }
-
+  joinRoomByCode: function (code, profile) {
+    var that = this
     wx.showLoading({ title: '进入中' })
-    api.getRoomByCode(value).then(function (room) {
+    api.getRoomByCode(code).then(function (room) {
       return api.addPlayer(room.id, {
         name: profile.nickname,
         avatarUrl: profile.avatarUrl
@@ -177,35 +235,11 @@ Page({
         joinRoomCode: ''
       })
       wx.navigateTo({ url: '/pages/room/room?id=' + room.id })
-    }).catch(function () {
+    }).catch(function (err) {
       wx.hideLoading()
-      wx.showToast({ title: '房间不存在', icon: 'none' })
+      console.error('enter room failed', err)
+      wx.showToast({ title: api.getErrorMessage(err, '进入失败'), icon: 'none' })
     })
-  },
-
-  findRoomByCode: function (code) {
-    var value = (code || '').trim()
-    if (!value) {
-      wx.showToast({ title: '请输入房间码', icon: 'none' })
-      return null
-    }
-
-    if (value.indexOf('poker_room:') === 0) {
-      value = value.replace('poker_room:', '')
-    }
-
-    var room = storage.getRoomById(value)
-    if (room) return room
-
-    var roomName = value.toUpperCase()
-    var rooms = storage.getRooms()
-    for (var i = 0; i < rooms.length; i++) {
-      if ((rooms[i].name || '').toUpperCase() === roomName) {
-        return storage.getRoomById(rooms[i].id) || rooms[i]
-      }
-    }
-
-    return null
   },
 
   goHistory: function () {
@@ -226,6 +260,7 @@ Page({
   },
 
   onCloseModal: function () {
+    this.pendingJoinAction = null
     this.setData({ showEditModal: false })
   },
 
@@ -239,16 +274,72 @@ Page({
 
   onSaveProfile: function () {
     var nickname = this.data.editNickname.trim()
+    var avatarUrl = this.data.editAvatarUrl
+    var pendingJoinAction = this.pendingJoinAction
     if (!nickname) {
       wx.showToast({ title: '请输入昵称', icon: 'none' })
       return
     }
-    storage.saveUserProfile({
+    if (!avatarUrl) {
+      wx.showToast({ title: '请先添加头像', icon: 'none' })
+      return
+    }
+
+    wx.showLoading({ title: '保存中' })
+    api.saveMyProfile({
       nickname: nickname,
-      avatarUrl: this.data.editAvatarUrl
+      avatarUrl: avatarUrl
+    }).then(function (profile) {
+      wx.hideLoading()
+      storage.saveUserProfile({
+        nickname: profile.nickname,
+        avatarUrl: profile.avatarUrl
+      })
+      this.pendingJoinAction = null
+      this.setData({
+        showEditModal: false
+      })
+      this.loadData()
+      wx.showToast({ title: '保存成功', icon: 'success' })
+      if (pendingJoinAction) pendingJoinAction(profile)
+    }.bind(this)).catch(function (err) {
+      wx.hideLoading()
+      wx.showToast({ title: api.getErrorMessage(err, '保存失败'), icon: 'none' })
     })
-    this.setData({ showEditModal: false })
-    this.loadData()
-    wx.showToast({ title: '保存成功', icon: 'success' })
+  },
+
+  ensureProfileBeforeJoin: function (resume) {
+    var that = this
+    var localProfile = storage.getUserProfile()
+
+    api.getMyProfile().then(function (profile) {
+      if (profile && profile.nickname && profile.avatarUrl) {
+        storage.saveUserProfile({
+          nickname: profile.nickname,
+          avatarUrl: profile.avatarUrl
+        })
+        resume(profile)
+        return
+      }
+
+      wx.showToast({ title: '请先完善头像和昵称', icon: 'none' })
+      that.pendingJoinAction = resume
+      that.setData({
+        showJoinModal: false,
+        showEditModal: true,
+        editNickname: (profile && profile.nickname) || localProfile.nickname || '',
+        editAvatarUrl: (profile && profile.avatarUrl) || localProfile.avatarUrl || ''
+      })
+    }).catch(function (err) {
+      console.error('load profile failed', err)
+      wx.showToast({ title: api.getErrorMessage(err, '请先完善资料'), icon: 'none' })
+      that.pendingJoinAction = resume
+      that.setData({
+        showJoinModal: false,
+        showEditModal: true,
+        editNickname: localProfile.nickname || '',
+        editAvatarUrl: localProfile.avatarUrl || ''
+      })
+    })
   }
 })

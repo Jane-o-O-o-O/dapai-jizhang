@@ -84,11 +84,9 @@
   <!-- 操作按钮 -->
   <view class="action-buttons">
     <view class="action-btn action-create card-anim anim-d2" bindtap="onCreateRoom" style="height: 100rpx; display: flex; box-sizing: border-box">
-      <text class="action-icon">＋</text>
       <text class="action-text" style="width: 135rpx; height: 39rpx; display: block; box-sizing: border-box">创建房间</text>
     </view>
     <view class="action-btn action-scan card-anim anim-d3" bindtap="onOpenJoinModal" style="height: 100rpx; display: flex; box-sizing: border-box">
-      <text class="action-icon">⌖</text>
       <text class="action-text">加入房间</text>
     </view>
   </view>

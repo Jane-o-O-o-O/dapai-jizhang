@@ -4,7 +4,7 @@ App({
   onLaunch: function () {
     if (wx.cloud) {
       wx.cloud.init({
-        env: 'prod-d4g4lbypz81013dea',
+        env: 'cloud1-d3g82yzmu88423dca',
         traceUser: true
       })
     }

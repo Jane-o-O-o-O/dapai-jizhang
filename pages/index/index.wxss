@@ -385,10 +385,8 @@ page {
   box-shadow: 0 4rpx 24rpx rgba(166,138,91,0.2);
 }
 
-.action-create .action-icon { color: #fff; }
 .action-create .action-text { color: #fff; }
 
-.container.dark .action-create .action-icon,
 .container.dark .action-create .action-text {
   color: #0a0a0a;
 }
@@ -403,17 +401,7 @@ page {
   box-shadow: 0 2rpx 16rpx rgba(0,0,0,0.3);
 }
 
-.action-scan .action-icon { color: var(--gold); }
 .action-scan .action-text { color: var(--cream); }
-
-.action-icon {
-  width: 40rpx;
-  height: 40rpx;
-  margin-bottom: 10rpx;
-  font-size: 36rpx;
-  line-height: 40rpx;
-  text-align: center;
-}
 
 .action-text {
   font-size: 28rpx;

@@ -14,20 +14,12 @@
           <view wx:else class="player-avatar player-avatar-default">
             <text class="player-avatar-char">{{item.initial}}</text>
           </view>
-          <view class="player-me" wx:if="{{index === 0}}">
+          <view class="player-me" wx:if="{{item.id === myPlayerId}}">
             <text class="player-me-text">我</text>
           </view>
         </view>
         <text class="player-name">{{item.name}}</text>
         <text class="player-score {{item.score >= 0 ? 'score-positive' : 'score-negative'}}">{{item.score}}</text>
-      </view>
-      <view class="player-card player-add" bindtap="onAddPlayer">
-        <view class="player-avatar-wrap">
-          <view class="player-avatar player-avatar-add">
-            <text class="player-add-char">+</text>
-          </view>
-        </view>
-        <text class="player-name player-name-dim">添加</text>
       </view>
     </view>
   </scroll-view>
@@ -39,12 +31,28 @@
       <text class="score-count">共 {{room.rounds.length}} 笔</text>
     </view>
 
-    <view class="rounds-list" wx:if="{{room.rounds.length > 0}}">
-      <view class="round-item" wx:for="{{room.rounds}}" wx:key="id" wx:for-item="round" wx:for-index="rIdx">
-        <text class="round-note">{{round.note}}</text>
-        <text class="round-amount">{{round.amount}}</text>
-        <view class="round-delete" catchtap="onDeleteRound" data-id="{{round.id}}">
-          <svg style="width:28rpx;height:28rpx;" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    <view class="rounds-list" wx:if="{{displayRounds.length > 0}}">
+      <view class="round-message {{round.isMine ? 'round-message-mine' : 'round-message-other'}} {{round.hasPeriodGap ? 'round-period-gap' : ''}}" wx:for="{{displayRounds}}" wx:key="id" wx:for-item="round">
+        <view class="round-meta">
+          <text class="round-actor">{{round.actorName}}</text>
+          <text class="round-time">{{round.timeText}}</text>
+        </view>
+        <view class="round-row">
+          <view class="round-avatar">
+            <image wx:if="{{round.actorAvatarUrl}}" class="round-avatar-img" src="{{round.actorAvatarUrl}}" mode="aspectFill" />
+            <view wx:else class="round-avatar-default">
+              <text class="round-avatar-char">{{round.actorInitial}}</text>
+            </view>
+          </view>
+          <view class="round-bubble">
+            <text class="round-direction">向</text>
+            <text class="round-target">{{round.targetName}}</text>
+            <text class="round-action">转账</text>
+            <text class="round-amount">{{round.amount}}</text>
+          </view>
+          <view class="round-delete" catchtap="onDeleteRound" data-id="{{round.id}}">
+            <svg style="width:28rpx;height:28rpx;" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          </view>
         </view>
       </view>
     </view>
@@ -60,9 +68,41 @@
       <svg class="bottom-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="3" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="14" y="3" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="3" y="14" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="14" y="14" width="3" height="3" fill="currentColor"/><rect x="18" y="18" width="3" height="3" fill="currentColor"/><rect x="14" y="18" width="3" height="3" fill="currentColor"/><rect x="18" y="14" width="3" height="3" fill="currentColor"/></svg>
       <text class="bottom-text">二维码</text>
     </view>
+    <button class="bottom-btn btn-share" open-type="share">
+      <svg class="bottom-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="18" cy="5" r="3" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="6" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="18" cy="19" r="3" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8.7 10.7L15.3 6.3M8.7 13.3L15.3 17.7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      <text class="bottom-text">分享</text>
+    </button>
     <view class="bottom-btn btn-end" bindtap="onSettlement">
       <svg class="bottom-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="4" width="16" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
       <text class="bottom-text">结算</text>
+    </view>
+  </view>
+</view>
+
+<!-- 受邀进入资料弹窗 -->
+<view class="modal-mask" wx:if="{{showProfileModal}}">
+  <view class="modal-content profile-modal" catchtap>
+    <view class="modal-header">
+      <text class="modal-title">完善个人信息</text>
+    </view>
+    <view class="modal-body">
+      <view class="form-item">
+        <text class="form-label">头像</text>
+        <button class="profile-avatar-upload" open-type="chooseAvatar" bindchooseavatar="onChooseProfileAvatar">
+          <image wx:if="{{profileAvatarUrl}}" class="profile-avatar-preview" src="{{profileAvatarUrl}}" mode="aspectFill" />
+          <view wx:else class="profile-avatar-placeholder">
+            <text class="profile-avatar-plus">+</text>
+          </view>
+        </button>
+      </view>
+      <view class="form-item">
+        <text class="form-label">昵称</text>
+        <input class="input" type="nickname" placeholder="请输入昵称" placeholder-class="input-placeholder" value="{{profileNickname}}" bindinput="onProfileNicknameInput" maxlength="12" />
+      </view>
+      <text class="profile-hint">完善后会自动加入当前房间</text>
+    </view>
+    <view class="modal-footer">
+      <view class="modal-btn modal-btn-confirm" bindtap="onSaveInvitedProfile">保存并进入</view>
     </view>
   </view>
 </view>
@@ -72,9 +112,9 @@
   <view class="transfer-modal" catchtap style="height: 606rpx; display: block; box-sizing: border-box">
     <text class="transfer-title">记账</text>
     <view class="native-score-avatar-wrap">
-      <image wx:if="{{scoringPlayer.avatarUrl}}" class="native-score-avatar" src="{{scoringPlayer.avatarUrl}}" mode="aspectFill" />
-      <view wx:else class="native-score-avatar native-score-avatar-default">
-        <text class="native-score-avatar-char">{{scoringPlayer.initial}}</text>
+      <image wx:if="{{scoringPlayer.avatarUrl}}" class="player-avatar native-score-avatar" src="{{scoringPlayer.avatarUrl}}" mode="aspectFill" binderror="onScoringAvatarError" />
+      <view wx:else class="player-avatar player-avatar-default native-score-avatar">
+        <text class="player-avatar-char">{{scoringPlayer.initial}}</text>
       </view>
     </view>
     <text class="transfer-target">{{scoringPlayer.name}}</text>
@@ -110,34 +150,25 @@
       </view>
     </view>
     <view class="qr-body">
+      <image class="qr-image" wx:if="{{qrImageUrl}}" src="{{qrImageUrl}}" mode="aspectFit" show-menu-by-longpress />
+      <view class="qr-loading" wx:elif="{{qrLoading}}">
+        <text class="qr-loading-text">小程序码生成中</text>
+      </view>
+      <view class="qr-code" wx:elif="{{qrRows.length > 0}}">
+        <view class="qr-row" wx:for="{{qrRows}}" wx:key="index" wx:for-item="row">
+          <view class="qr-cell {{cell.dark ? 'qr-cell-dark' : ''}}" wx:for="{{row.cells}}" wx:key="index" wx:for-item="cell"></view>
+        </view>
+      </view>
       <view class="room-id-display">
         <text class="room-id-label">房间号</text>
         <text class="room-id-value">{{room.name}}</text>
       </view>
-      <text class="qr-hint">请将房间号分享给其他玩家</text>
-      <view class="qr-copy" bindtap="onCopyRoomName"><text>复制房间号</text></view>
-    </view>
-  </view>
-</view>
-
-<!-- 添加玩家弹窗 -->
-<view class="modal-mask" wx:if="{{showAddPlayer}}" bindtap="onCloseAddPlayer">
-  <view class="modal-content" catchtap>
-    <view class="modal-header">
-      <text class="modal-title">添加玩家</text>
-      <view class="modal-close" bindtap="onCloseAddPlayer">
-        <svg style="width:28rpx;height:28rpx;display:block;" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <text class="qr-hint">{{qrImageUrl ? '微信扫一扫可直接进入房间' : '可在小程序内扫码或复制房间号进入'}}</text>
+      <text class="qr-error" wx:if="{{qrError}}">{{qrError}}</text>
+      <view class="qr-actions">
+        <button class="qr-action qr-action-primary" open-type="share">分享房间</button>
+        <view class="qr-action qr-action-secondary" bindtap="onCopyRoomName"><text>复制房间号</text></view>
       </view>
-    </view>
-    <view class="modal-body">
-      <view class="form-item">
-        <text class="form-label">玩家昵称</text>
-        <input class="input" placeholder="请输入昵称" placeholder-class="input-placeholder" value="{{newPlayerName}}" bindinput="onNewPlayerInput" maxlength="12" />
-      </view>
-    </view>
-    <view class="modal-footer">
-      <view class="modal-btn modal-btn-cancel" bindtap="onCloseAddPlayer">取消</view>
-      <view class="modal-btn modal-btn-confirm" bindtap="onConfirmAddPlayer">添加</view>
     </view>
   </view>
 </view>
